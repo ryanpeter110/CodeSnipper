@@ -9,9 +9,13 @@ import pandas as pd
 from pytesseract import Output
 
 class CodeSnipper(QtWidgets.QWidget):
-    def __init__(self, tesseract_path):
+    is_snipping = False
+    background = True
+    tesseract_path = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
+    def __init__(self):
         super().__init__()
-        pytesseract.pytesseract.tesseract_cmd = tesseract_path
+        pytesseract.pytesseract.tesseract_cmd = CodeSnipper.tesseract_path
         root = tk.Tk()
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
@@ -19,7 +23,11 @@ class CodeSnipper(QtWidgets.QWidget):
         self.setWindowTitle(' ')
         self.begin = QtCore.QPoint()
         self.end = QtCore.QPoint()
+
+    def start(self):
         self.setWindowOpacity(0.3)
+        CodeSnipper.background = False
+        CodeSnipper.is_snipping = True
         QtWidgets.QApplication.setOverrideCursor(
             QtGui.QCursor(QtCore.Qt.CrossCursor)
         )
@@ -101,8 +109,7 @@ class CodeSnipper(QtWidgets.QWidget):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    tesseract_path = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-    window = CodeSnipper(tesseract_path)
+    window = CodeSnipper()
     window.show()
     app.aboutToQuit.connect(app.deleteLater)
     sys.exit(app.exec_())

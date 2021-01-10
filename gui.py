@@ -1,23 +1,38 @@
-import tkinter as tk
-from PyQt5 import QtWidgets
 import sys
+from PyQt5.QtCore import QPoint, Qt
+from PyQt5.QtWidgets import  QMainWindow, QApplication, QPushButton
 from codesnipper import CodeSnipper
 
-#######Functions########################
+class CodeSnipperGUI(QMainWindow):
 
-def startSnipping():
-    app = QtWidgets.QApplication(sys.argv)
+    def __init__(self):
+        super().__init__()
+        self.brushSize = 3
+        self.brushColor = Qt.red
+        self.lastPoint = QPoint()
+        self.title = "Code Snipper"
+        self.start_position=(50, 150, 250, 50)
+        self.setWindowTitle("Code Snipper")
 
-    tesseract_path = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-    window = CodeSnipper(tesseract_path)
-    window.show()
-    app.aboutToQuit.connect(app.deleteLater)
+        start_snipping_button = QPushButton(self) 
+        # start_snipping_button.resize(100,32)
+        start_snipping_button.move(75, 10)        
+        start_snipping_button.setText("Start Snipping")
+        start_snipping_button.adjustSize() 
+
+        start_snipping_button.clicked.connect(self.start_snipping) 
+
+        self.snippingTool = CodeSnipper()
+        self.setGeometry(*self.start_position)
+
+        self.show()
+
+    def start_snipping(self):
+        if self.snippingTool.background:
+            self.close()
+        self.snippingTool.start()
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    mainMenu = CodeSnipperGUI()
     sys.exit(app.exec_())
-
-
-########################################
-root = tk.Tk()
-button = tk.Button(root, text = "Start Snipping", command = startSnipping)
-button.pack()
-root.mainloop()
-
