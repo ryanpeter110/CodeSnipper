@@ -1,1 +1,3 @@
 env/
+__pycache__
+CHROME_EXTENTION/OCR/ocr_env

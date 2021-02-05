@@ -1,7 +1,9 @@
 import sys
 from PyQt5 import QtWidgets, QtCore, QtGui
 import tkinter as tk
-from PIL import ImageGrab , Image
+from PIL import ImageGrab # for windows 
+from PIL import Image
+# import pyscreenshot as ImageGrab # for ubuntu
 import numpy as np
 import pytesseract
 import pyperclip
@@ -11,11 +13,11 @@ from pytesseract import Output
 class CodeSnipper(QtWidgets.QWidget):
     is_snipping = False
     background = True
-    tesseract_path = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    # tesseract_path = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
     def __init__(self):
         super().__init__()
-        pytesseract.pytesseract.tesseract_cmd = CodeSnipper.tesseract_path
+        # pytesseract.pytesseract.tesseract_cmd = CodeSnipper.tesseract_path
         root = tk.Tk()
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
@@ -37,39 +39,45 @@ class CodeSnipper(QtWidgets.QWidget):
 
     def paintEvent(self, event):
         qp = QtGui.QPainter(self)
-        qp.setPen(QtGui.QPen(QtGui.QColor('black'), 3))
+        qp.setPen(QtGui.QPen(QtGui.QColor('white'), 3))
         qp.setBrush(QtGui.QColor(128, 128, 255, 128))
         qp.drawRect(QtCore.QRect(self.begin, self.end))
 
     def mousePressEvent(self, event):
         self.begin = event.pos()
+        # print(self.begin)
         self.end = self.begin
         self.update()
 
     def mouseMoveEvent(self, event):
         self.end = event.pos()
+        # print(self.end)
         self.update()
 
     def mouseReleaseEvent(self, event):
         self.close()
-
+        
         x1 = min(self.begin.x(), self.end.x())
         y1 = min(self.begin.y(), self.end.y())
         x2 = max(self.begin.x(), self.end.x())
         y2 = max(self.begin.y(), self.end.y())
+        print(x1,y1,x2,y2)
         
-        img = ImageGrab.grab(bbox=(x1, y1, x2, y2)).convert('RGB')
+        img = ImageGrab.grab(bbox=(x1 -5, y1 + 35 , x2, y2+10)).convert('RGB')
+        img.save('testPic.png')
         # treshold_image = self.__tresholdImage(img)
 
         custom_config = r'-c preserve_interword_spaces=1 --oem 1 --psm 1 -l eng+ita'
         d = pytesseract.image_to_data(img, config=custom_config, output_type=Output.DICT)
-        
+        # d = pytesseract.image_to_data(img, config=custom_config, output_type=Output.DICT)
+
         df = pd.DataFrame(d)
         print(df.head(-1))
         words = self.__indentCode(df)
         words = "".join(words)
+        print(f"{words}")
         pyperclip.copy(words) 
-    
+      
     def __indentCode(self,image_dataframe):
         indentedCode = []
         df1 = image_dataframe[(image_dataframe.conf!='-1')&(image_dataframe.text!=' ')&(image_dataframe.text!='')]
@@ -110,17 +118,9 @@ class CodeSnipper(QtWidgets.QWidget):
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     window = CodeSnipper()
-    window.show()
+    window.start()
     app.aboutToQuit.connect(app.deleteLater)
     sys.exit(app.exec_())
 
-
-
-
-
-
-
-
-
-
-
+    # img = ImageGrab.grab(bbox=(430 -5, 173 + 35, 786, 278 + 5)).convert('RGB')
+    # img.save('testPic.png')
